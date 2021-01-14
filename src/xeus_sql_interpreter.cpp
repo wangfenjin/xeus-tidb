@@ -44,6 +44,8 @@ namespace xeus_sql
 
         /* Builds table header */
         const soci::row& first_row = *rows.begin();
+        if (first_row.size() == 0)
+            return pub_data;
 
         html_table << "<table>\n<tr>\n";
         for(std::size_t i = 0; i < first_row.size(); ++i)
@@ -163,7 +165,7 @@ namespace xeus_sql
                 if (this->sql)
                 {
                     /* Shows rich output for tables */
-                    if (xv_bindings::case_insentive_equals("SELECT", tokenized_input[0]))
+                    if (true || xv_bindings::case_insentive_equals("SELECT", tokenized_input[0]))
                     {
                         nl::json data = process_SQL_input(code, xv_sql_df);
 
