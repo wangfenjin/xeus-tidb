@@ -13,12 +13,14 @@
 #include <cstdio>
 #include <ctime>
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <set>
 #include <sstream>
 #include <tuple>
 #include <vector>
 
+#include "soci/mysql/soci-mysql.h"
 #include "xeus-tidb/soci_handler.hpp"
 #include "xeus/xinterpreter.hpp"
 
@@ -80,7 +82,7 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
                     break;
             }
             html_table << "<td>" << cell << "</td>\n";
-            xv_sql_df[r.get_properties(i).get_name()].push_back(cell);
+            xv_sql_df[props.get_name()].push_back(cell);
         }
         html_table << "</tr>\n";
     }
@@ -95,7 +97,6 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
 nl::json interpreter::execute_request_impl(int execution_counter, const std::string& code, bool /*silent*/,
                                            bool /*store_history*/, nl::json /*user_expressions*/,
                                            bool /*allow_stdin*/) {
-    std::vector<std::string> traceback;
     std::vector<std::string> tokenized_code = tokenizer(code);
     xv::df_type xv_sql_df;
     std::vector<std::string> row_headers;
@@ -117,6 +118,9 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
                     std::string sql = code;
                     sql.erase(0, code.find("\n") + 1);
                     nl::json data = process_SQL_input(sql, row_headers, xv_sql_df);
+                    if (xv_sql_df.size() == 0) {
+                        throw std::runtime_error("empty result from sql, can't render");
+                    }
                     xv::data_frame data_frame;
                     data_frame.values = xv_sql_df;
                     j["data"] = data_frame;
@@ -165,15 +169,33 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
     }
 
     catch (const std::runtime_error& err) {
-        nl::json jresult;
-        jresult["status"] = "error";
-        jresult["ename"] = "Error";
-        jresult["evalue"] = err.what();
-        traceback.push_back((std::string)jresult["ename"] + ": " + (std::string)err.what());
-        publish_execution_error(jresult["ename"], jresult["evalue"], traceback);
-        traceback.clear();
-        return jresult;
+        return handle_exception((std::string)err.what());
+    } catch (std::exception const& err) {
+        return handle_exception((std::string)err.what());
+    } catch (soci::mysql_soci_error const& err) {
+        return handle_exception((std::string)err.what());
+    } catch (...) {
+        // https:  // stackoverflow.com/a/54242936/1203241
+        try {
+            std::exception_ptr curr_excp;
+            if (curr_excp = std::current_exception()) {
+                std::rethrow_exception(curr_excp);
+            }
+        } catch (const std::exception& err) {
+            return handle_exception((std::string)err.what());
+        }
     }
+}
+
+nl::json interpreter::handle_exception(std::string what) {
+    std::vector<std::string> traceback;
+    nl::json jresult;
+    jresult["status"] = "error";
+    jresult["ename"] = "Error";
+    jresult["evalue"] = what;
+    traceback.push_back((std::string)jresult["ename"] + ": " + what);
+    publish_execution_error(jresult["ename"], jresult["evalue"], traceback);
+    return jresult;
 }
 
 nl::json interpreter::complete_request_impl(const std::string& /*code*/, int /*cursor_pos*/) {

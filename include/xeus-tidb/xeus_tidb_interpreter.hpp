@@ -10,6 +10,8 @@
 #ifndef XEUS_TIDB_INTERPRETER_HPP
 #define XEUS_TIDB_INTERPRETER_HPP
 
+#include <string>
+
 #include "nlohmann/json.hpp"
 #include "soci/soci.h"
 #include "xeus/xinterpreter.hpp"
@@ -34,7 +36,7 @@ class XEUS_TIDB_API interpreter : public xeus::xinterpreter {
     nl::json is_complete_request_impl(const std::string& code) override;
     nl::json kernel_info_request_impl() override;
     void shutdown_request_impl() override;
-
+    nl::json handle_exception(std::string what);
     nl::json process_SQL_input(const std::string& code, std::vector<std::string>& row_headers,
                                xv::df_type& xv_sqlite_df);
 

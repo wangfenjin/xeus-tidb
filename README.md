@@ -37,7 +37,7 @@ conda activate xeus-tidb
 To install the xeus-tidb dependencies:
 
 ```bash
-conda install nlohmann_json xtl cppzmq xeus xvega xproperty jupyterlab soci-mysql compilers cmake -c conda-forge
+conda install nlohmann_json xtl cppzmq xeus xvega xproperty jupyterlab soci-mysql mysqlclient compilers cmake -c conda-forge
 ```
 
 Then you can compile the sources
