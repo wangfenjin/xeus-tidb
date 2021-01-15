@@ -1,84 +1,57 @@
-# xeus-sql
-[![Build Status](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_apis/build/status/jupyter-xeus.xeus-sql?branchName=master)](https://dev.azure.com/jupyter-xeus/jupyter-xeus/_build/latest?definitionId=9&branchName=master)
-[![Documentation Status](https://readthedocs.org/projects/xeus-sql/badge/?version=latest)](https://xeus-sql.readthedocs.io/en/latest/?badge=latest)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter-xeus/xeus-sql/master?filepath=examples/SQLite.ipynb)
+# xeus-tidb
 
-`xeus-sql` is a Jupyter kernel for general SQL implementations based on the native implementation of the Jupyter protocol [xeus](https://github.com/jupyter-xeus/xeus) and [SOCI](https://github.com/SOCI/soci), a database access library for C++.
+A Jupyter kernel for TiDB
+
+- Author(s):     [wangfenjin](https://github.com/wangfenjin) (Wang Fenjin)
+- Last updated:  2021-01-15
+
+## Abstract
+
+Jupyter with Python kernel is widely used in scientific computing community, But another important tool for data science is the SQL family of programming languages.
+
+This new kernel allows the user to use the complete TiDB syntax as well as some extra operations such as opening or closing a database connection, or visualizing the data in different ways using Jupyter magics.
 
 ## Usage
 
-Launch the Jupyter notebook with `jupyter notebook` or Jupyter lab with `jupyter lab` and launch a new SQL notebook by selecting the **xsql** kernel.
-
-Note that `xeus-sql` support the following SQL implementations:
-
-* DB2
-* Firebird
-* MySQL
-* ODBC (generic backend)
-* Oracle
-* PostgreSQL
-* SQLite3
+Launch the Jupyter notebook with `jupyter notebook` or Jupyter lab with `jupyter lab` and launch a new SQL notebook by selecting the **xtidb** kernel.
 
 ## Installation
 
-`xeus-sql` has been packaged for the conda package manager.
+`xeus-tidb` has been packaged for the conda package manager.
 
-To ensure that the installation works, it is preferable to install `xeus-sql` in a fresh conda environment.
+To ensure that the installation works, it is preferable to install `xeus-tidb` in a fresh conda environment.
 
 To ensure that the installation works, it is preferable to install `xeus` in a fresh conda environment. It is also needed to use
 a [miniconda](https://conda.io/miniconda.html) installation because with the full [anaconda](https://www.anaconda.com/)
 you may have a conflict.
 
-The safest usage is to create an environment named `xeus-sql` with your miniconda installation
+The safest usage is to create an environment named `xeus-tidb` with your miniconda installation
 
 ```
-conda create -n xeus-sql
-conda activate xeus-sql
+conda create -n xeus-tidb
+conda activate xeus-tidb
 ```
 
-### Installing from conda
+### Installing from source
 
-To install xeus-sql with the conda package manager:
+To install the xeus-tidb dependencies:
 
-```
-conda install xeus-sql jupyterlab -c conda-forge
-```
-
-With mamba:
-
-```
-mamba install xeus-sql jupyterlab -c conda-forge
+```bash
+conda install nlohmann_json xtl cppzmq xeus xvega jupyterlab soci-mysql compilers cmake -c conda-forge
 ```
 
-Conda forge offers packaged versions for MySQL, PostgreSQL and SQLite and you can download them with: `soci-mysql`, `soci-postresql` or `soci-sqlite`.
+Then you can compile the sources
 
-`xeus-sql` includes `soci-core` only. Which consists on the SOCI package with no DB extension attached.
+```bash
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=${CONDA_PREFIX} -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+make -j 12 install
+```
 
-## Documentation
+## Credits
 
-https://xeus-sql.readthedocs.io/en/latest/
-
-## Dependencies
-
-``xeus-sql`` depends on
-
-- [xeus](https://github.com/jupyter-xeus/xeus)
-- [Tabulate](https://github.com/p-ranav/tabulate)
-- [xvega](https://github.com/Quantstack/xvega)
-- [SQLite\*](https://github.com/sqlite/sqlite)
-- [PostgreSQL\*](https://github.com/postgres)
-- [MySQL\*](https://github.com/mysql/mysql-server)
-
-| `xeus-sql`  |      `xeus`     | `PostgreSQL*`   |    `SQLite*`    |   `MySQL*`      |    `Tabulate`   | `nlohmann_json` |   `xvega`   | `soci-core` | `xproperty` | `xvega-bindings` |
-|--------------|-----------------|-----------------|-----------------|-----------------|-----------------|----------------|-------------|------------|-----------|--------------|
-|    master    | >=0.24.0, <0.25 | >=3.30.1, <4    | >=3.0.0, <4     | >=1.3.0,<2.0    |                 |>=3.0.0         |   >= 0.0.5  | 4.0.1      | 0.10.4      | >=0.0.3          |
-|    =>0.0.4    | >=0.24.0, <0.25 | >=3.30.1, <4    | >=3.0.0, <4     | >=1.3.0,<2.0    |                 |>=3.0.0         |   >= 0.0.5  | 4.0.1      | 0.10.4      | >=0.0.3          |
-
-\* These are optional dependencies that come by default with `xeus-sql` but may or may not be added to your project in case you're building manually. For more information check the CONTRIBUTING file.
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) to know how to contribute and set up a development environment.
+This project is inspired by [xeus-sqlite](https://github.com/jupyter-xeus/xeus-sqlite) and [xeus-sql](https://github.com/jupyter-xeus/xeus-sql), and reuse some code/doc from the project! Thanks!
 
 ## License
 
