@@ -13,7 +13,8 @@
 #include "nlohmann/json.hpp"
 #include "xeus/xinterpreter.hpp"
 #include "soci/soci.h"
-#include "xvega-bindings/xvega_bindings.hpp"
+// #include "xvega-bindings/xvega_bindings.hpp"
+#include "xvega/xvega.hpp"
 
 #include "xeus_sql_interpreter.hpp"
 #include "xeus_sql_config.hpp"

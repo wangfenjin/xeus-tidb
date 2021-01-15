@@ -16,7 +16,6 @@
 #include "nlohmann/json.hpp"
 #include "soci/soci.h"
 #include "xeus/xinterpreter.hpp"
-#include "xvega-bindings/xvega_bindings.hpp"
 
 #include "xeus_sql_interpreter.hpp"
 
@@ -24,6 +23,30 @@ namespace nl = nlohmann;
 
 namespace xeus_sql
 {
+    static bool case_insentive_equals(const std::string& a, const std::string& b)
+    {
+        return std::equal(a.begin(), a.end(), b.begin(),
+                          [](unsigned char a, unsigned char b) {
+                              return std::tolower(a) == std::tolower(b);
+                          });
+    }
+
+    static std::string to_lower(const std::string& input)
+    {
+        std::string lower_case_input;
+        lower_case_input.resize(input.length());
+        std::transform(input.begin(), input.end(), lower_case_input.begin(), ::tolower);
+        return lower_case_input;
+    }
+
+    static std::string to_upper(const std::string& input)
+    {
+        std::string upper_case_input;
+        upper_case_input.resize(input.length());
+        std::transform(input.begin(), input.end(), upper_case_input.begin(), ::toupper);
+        return upper_case_input;
+    }
+
     static std::unique_ptr<soci::session> load_db(
             const std::vector<std::string> tokenized_input)
     {
@@ -33,13 +56,13 @@ namespace xeus_sql
             aux += tokenized_input[i] + ' ';
         }
         return std::make_unique<soci::session>(
-                xv_bindings::to_lower(tokenized_input[1]), aux);
+                to_lower(tokenized_input[1]), aux);
     }
 
     static std::unique_ptr<soci::session> parse_SQL_magic(
             const std::vector<std::string>& tokenized_input)
     {
-        if (xv_bindings::case_insentive_equals(tokenized_input[0], "LOAD"))
+        if (case_insentive_equals(tokenized_input[0], "LOAD"))
         {
             return load_db(tokenized_input);
         }

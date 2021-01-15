@@ -77,13 +77,10 @@ set(xeus_REQUIRED_VERSION 0.23.10)
 find_package(xeus ${xeus_REQUIRED_VERSION} REQUIRED)
 find_package(xvega)
 
-find_package(tabulate REQUIRED)
 find_package(Threads REQUIRED)
 
 find_package(Soci REQUIRED MODULE)
-find_package(PostgreSQL)
 find_package(mysql)
-find_package(SQLite3)
 
 # Target and link
 # ===============

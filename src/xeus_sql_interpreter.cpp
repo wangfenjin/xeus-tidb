@@ -17,7 +17,6 @@
 #include <vector>
 #include <tuple>
 
-#include "tabulate/table.hpp"
 #include "xeus/xinterpreter.hpp"
 
 #include "xeus-sql/xeus_sql_interpreter.hpp"
@@ -75,10 +74,6 @@ namespace xeus_sql
                                             xv::df_type& xv_sql_df)
     {
         nl::json pub_data;
-        std::vector<std::string> plain_table_header;
-        std::vector<std::string> plain_table_row;
-
-        tabulate::Table plain_table;
         std::stringstream html_table("");
 
         soci::rowset<soci::row> rows = ((*this->sql).prepare << code);
@@ -93,7 +88,6 @@ namespace xeus_sql
             html_table << "<th>" << name << "</th>\n";
             xv_sql_df[name] = { "name" };
             row_headers.push_back(name);
-            plain_table_header.push_back(name);
         }
         html_table << "</tr>\n";
 
@@ -136,7 +130,6 @@ namespace xeus_sql
                         break;
                 }
                 html_table << "<td>" << cell << "</td>\n";
-                plain_table_row.push_back(cell);
                 xv_sql_df[r.get_properties(i).get_name()].push_back(cell);
             }
                 html_table << "</tr>\n";
@@ -157,12 +150,8 @@ namespace xeus_sql
                                                bool /*allow_stdin*/)
     {
 
-        // log(logINFO) << "normal case\n";
         std::vector<std::string> traceback;
         std::vector<std::string> tokenized_code = tokenizer(code);
-        // std::string sanitized_code = xv_bindings::sanitize_string(code);
-        // std::vector<std::string> tokenized_input = xv_bindings::tokenizer(sanitized_code);
-
         xv::df_type xv_sql_df;
         std::vector<std::string> row_headers;
         try
@@ -179,7 +168,6 @@ namespace xeus_sql
                     std::ifstream i(tokenized_code[2]);
                     nl::json j;
                     i >> j;
-                    std::cerr << "before:" << j << std::endl;
                     if (tokenized_code.size() > 3) {
                         // we have SQL
                         std::string sql = code;
@@ -197,7 +185,6 @@ namespace xeus_sql
                         //     j["encoding"]["y"].erase("title");
                         // }
                     }
-                    std::cerr << "after:" << j << std::endl;
                     auto bundle = nl::json::object();
                     bundle["application/vnd.vegalite.v3+json"] = j;
                     publish_execution_result(execution_counter,
@@ -212,9 +199,8 @@ namespace xeus_sql
                 if (this->sql)
                 {
                     /* Shows rich output for tables */
-                    if (xv_bindings::case_insentive_equals("SELECT", tokenized_code[1]) ||
-                        xv_bindings::case_insentive_equals("DESC", tokenized_code[1]) ||
-                        xv_bindings::case_insentive_equals("SHOW", tokenized_code[1]))
+                    if (case_insentive_equals("SELECT", tokenized_code[1]) ||
+                        case_insentive_equals("SHOW", tokenized_code[1]))
                     {
                         //log(logINFO) << "running sql\n";
                         nl::json data = process_SQL_input(code, row_headers, xv_sql_df);
