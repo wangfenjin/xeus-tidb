@@ -1,7 +1,0 @@
-name: xeus-sql-docs
-
-channels:
-  - conda-forge
-
-dependencies:
-  - breathe
