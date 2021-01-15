@@ -7,32 +7,32 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XSQL_CONFIG_HPP
-#define XSQL_CONFIG_HPP
+#ifndef XTIDB_CONFIG_HPP
+#define XTIDB_CONFIG_HPP
 
 // Project version
-#define XSQL_VERSION_MAJOR 0
-#define XSQL_VERSION_MINOR 0
-#define XSQL_VERSION_PATCH 5
+#define XTIDB_VERSION_MAJOR 0
+#define XTIDB_VERSION_MINOR 0
+#define XTIDB_VERSION_PATCH 5
 
 // Composing the version string from major, minor and patch
-#define XSQL_CONCATENATE(A, B) XSQL_CONCATENATE_IMPL(A, B)
-#define XSQL_CONCATENATE_IMPL(A, B) A##B
-#define XSQL_STRINGIFY(a) XSQL_STRINGIFY_IMPL(a)
-#define XSQL_STRINGIFY_IMPL(a) #a
+#define XTIDB_CONCATENATE(A, B) XTIDB_CONCATENATE_IMPL(A, B)
+#define XTIDB_CONCATENATE_IMPL(A, B) A##B
+#define XTIDB_STRINGIFY(a) XTIDB_STRINGIFY_IMPL(a)
+#define XTIDB_STRINGIFY_IMPL(a) #a
 
-#define XSQL_VERSION XSQL_STRINGIFY(XSQL_CONCATENATE(XSQL_VERSION_MAJOR,     \
-                      XSQL_CONCATENATE(.,XSQL_CONCATENATE(XSQL_VERSION_MINOR, \
-                      XSQL_CONCATENATE(.,XSQL_VERSION_PATCH)))))
+#define XTIDB_VERSION XTIDB_STRINGIFY(XTIDB_CONCATENATE(XTIDB_VERSION_MAJOR,     \
+                      XTIDB_CONCATENATE(.,XTIDB_CONCATENATE(XTIDB_VERSION_MINOR, \
+                      XTIDB_CONCATENATE(.,XTIDB_VERSION_PATCH)))))
 
 #ifdef _WIN32
-    #ifdef XEUS_SQL_EXPORTS
-        #define XEUS_SQL_API __declspec(dllexport)
+    #ifdef XEUS_TIDB_EXPORTS
+        #define XEUS_TIDB_API __declspec(dllexport)
     #else
-        #define XEUS_SQL_API __declspec(dllimport)
+        #define XEUS_TIDB_API __declspec(dllimport)
     #endif
 #else
-    #define XEUS_SQL_API
+    #define XEUS_TIDB_API
 #endif
 
 #endif

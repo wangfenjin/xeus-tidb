@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2020, QuantStack and xeus-sql contributors                *
+* Copyright (c) 2020, QuantStack and xeus-tidb contributors                *
 *                                                                          *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
@@ -7,8 +7,8 @@
 * The full license is in the file LICENSE, distributed with this software. *
 ****************************************************************************/
 
-#ifndef XEUS_SQL_HANDLER_HPP
-#define XEUS_SQL_HANDLER_HPP
+#ifndef XEUS_TIDB_HANDLER_HPP
+#define XEUS_TIDB_HANDLER_HPP
 
 #include <vector>
 #include <string>
@@ -17,12 +17,53 @@
 #include "soci/soci.h"
 #include "xeus/xinterpreter.hpp"
 
-#include "xeus_sql_interpreter.hpp"
+#include "xeus_tidb_interpreter.hpp"
 
 namespace nl = nlohmann;
 
-namespace xeus_sql
+namespace xeus_tidb
 {
+    static std::string sanitize_string(const std::string& code) {
+        /*
+          Cleans the code from inputs that are acceptable in a jupyter notebook.
+        */
+        std::string aux = code;
+        aux.erase(std::remove_if(aux.begin(), aux.end(), [](char const c) { return '\n' == c || '\r' == c || '\0' == c || '\x1A' == c; }),
+                  aux.end());
+        return aux;
+    }
+
+    static std::vector<std::string> tokenizer(const std::string& code) {
+        /*
+          Separetes the code on spaces so it's easier to execute the commands.
+        */
+        //std::stringstream input(sanitize_string(code));
+        std::stringstream input(code);
+        std::string segment;
+        std::vector<std::string> tokenized_str;
+        std::string is_magic(1, input.str()[0]);
+        tokenized_str.push_back(is_magic);
+
+        while (std::getline(input, segment, ' ')) {
+            tokenized_str.push_back(segment);
+        }
+
+        return tokenized_str;
+    }
+
+    static bool is_magic(std::vector<std::string>& tokenized_code) {
+        /*
+          Returns true if the code input is magic and false if isn't.
+        */
+        if (tokenized_code[0] == "%") {
+            tokenized_code[1].erase(0, 1);
+            std::transform(tokenized_code[1].begin(), tokenized_code[1].end(), tokenized_code[1].begin(), ::toupper);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     static bool case_insentive_equals(const std::string& a, const std::string& b)
     {
         return std::equal(a.begin(), a.end(), b.begin(),

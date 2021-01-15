@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2020, QuantStack and xeus-sql contributors                *
+* Copyright (c) 2020, QuantStack and xeus-tidb contributors                *
 *                                                                          *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
@@ -19,52 +19,11 @@
 
 #include "xeus/xinterpreter.hpp"
 
-#include "xeus-sql/xeus_sql_interpreter.hpp"
-#include "xeus-sql/soci_handler.hpp"
+#include "xeus-tidb/xeus_tidb_interpreter.hpp"
+#include "xeus-tidb/soci_handler.hpp"
 
-namespace xeus_sql
+namespace xeus_tidb
 {
-    std::string sanitize_string(const std::string& code) {
-        /*
-          Cleans the code from inputs that are acceptable in a jupyter notebook.
-        */
-        std::string aux = code;
-        aux.erase(std::remove_if(aux.begin(), aux.end(), [](char const c) { return '\n' == c || '\r' == c || '\0' == c || '\x1A' == c; }),
-                  aux.end());
-        return aux;
-    }
-
-    std::vector<std::string> tokenizer(const std::string& code) {
-        /*
-          Separetes the code on spaces so it's easier to execute the commands.
-        */
-        //std::stringstream input(sanitize_string(code));
-        std::stringstream input(code);
-        std::string segment;
-        std::vector<std::string> tokenized_str;
-        std::string is_magic(1, input.str()[0]);
-        tokenized_str.push_back(is_magic);
-
-        while (std::getline(input, segment, ' ')) {
-            tokenized_str.push_back(segment);
-        }
-
-        return tokenized_str;
-    }
-
-    bool is_magic(std::vector<std::string>& tokenized_code) {
-        /*
-          Returns true if the code input is magic and false if isn't.
-        */
-        if (tokenized_code[0] == "%") {
-            tokenized_code[1].erase(0, 1);
-            std::transform(tokenized_code[1].begin(), tokenized_code[1].end(), tokenized_code[1].begin(), ::toupper);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     void interpreter::configure_impl()
     {
     }
@@ -269,10 +228,10 @@ namespace xeus_sql
     nl::json interpreter::kernel_info_request_impl()
     {
         nl::json result;
-        result["implementation"] = "xsql";
-        result["implementation_version"] = XSQL_VERSION;
+        result["implementation"] = "xtidb";
+        result["implementation_version"] = XTIDB_VERSION;
 
-        /* The jupyter-console banner for xeus-sql is the following:
+        /* The jupyter-console banner for xeus-tidb is the following:
                                             _ 
                                            | |
             __  _____ _   _ ___   ___  __ _| |
@@ -281,7 +240,7 @@ namespace xeus_sql
             /_/\_\___|\__,_|___/ |___/\__, |_|
                                          | |  
                                          |_| 
-           xeus-sql: a Jupyter kernel for SOCI
+           xeus-tidb: a Jupyter kernel for SOCI
            SOCI version: x.x.x
         */
 
@@ -294,15 +253,15 @@ namespace xeus_sql
             "/_/\\_\\___|\\__,_|___/ |___/\\__, |_| "
             "                             | |   "
             "                             |_|  "
-            "  xeus-sql: a Jupyter kernel for SOCI\n"
+            "  xeus-tidb: a Jupyter kernel for SOCI\n"
             "  SOCI version: ";
-        banner.append(XSQL_VERSION);
+        banner.append(XTIDB_VERSION);
 
         result["banner"] = banner;
         //TODO: This should change with the language
         result["language_info"]["name"] = "mysql";
         result["language_info"]["codemirror_mode"] = "sql";
-        result["language_info"]["version"] = XSQL_VERSION;
+        result["language_info"]["version"] = XTIDB_VERSION;
         result["language_info"]["mimetype"] = "";
         result["language_info"]["file_extension"] = "";
         return result;

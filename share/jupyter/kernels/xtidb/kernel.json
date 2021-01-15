@@ -1,0 +1,9 @@
+{
+    "display_name": "xtidb",
+    "argv": [
+        "/home/wangfenjin/miniconda3/envs/tidb/bin/xtidb",
+        "-f",
+        "{connection_file}"
+    ],
+    "language": "mysql"
+}

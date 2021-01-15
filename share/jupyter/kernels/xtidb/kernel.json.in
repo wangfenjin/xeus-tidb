@@ -1,0 +1,9 @@
+{
+    "display_name": "xtidb",
+    "argv": [
+        "@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/xtidb",
+        "-f",
+        "{connection_file}"
+    ],
+    "language": "mysql"
+}

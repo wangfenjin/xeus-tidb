@@ -1,5 +1,5 @@
 /***************************************************************************
-* Copyright (c) 2020, QuantStack and xeus-sql contributors                *
+* Copyright (c) 2020, QuantStack and xeus-tidb contributors                *
 *                                                                          *
 *                                                                          *
 * Distributed under the terms of the BSD 3-Clause License.                 *
@@ -12,17 +12,17 @@
 
 #include "gtest/gtest.h"
 
-#include "xeus-sql/xeus_sql_interpreter.hpp"
-#include "xvega-bindings/utils.hpp"
+#include "xeus-tidb/xeus_tidb_interpreter.hpp"
+#include "xeus-tidb/soci_handler.hpp"
 
-namespace xeus_sql
+namespace xeus_tidb
 {
 
-TEST(xeus_sql_interpreter, tokenizer)
+TEST(xeus_tidb_interpreter, tokenizer)
 {
     std::string code = "\%LOAD database.db";
     std::vector<std::string> tokenized_code;
-    tokenized_code = xv_bindings::tokenizer(code);
+    tokenized_code = tokenizer(code);
     EXPECT_EQ(tokenized_code[1], "database.db");
 }
 
