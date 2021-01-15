@@ -10,6 +10,7 @@
 #include "xeus-tidb/xeus_tidb_interpreter.hpp"
 
 #include <cctype>
+#include <chrono>
 #include <cstdio>
 #include <ctime>
 #include <fstream>
@@ -27,38 +28,40 @@
 namespace xeus_tidb {
 void interpreter::configure_impl() {}
 
+using clock = std::chrono::system_clock;
+using sec = std::chrono::duration<double>;
+
 nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std::string>& row_headers,
                                         xv::df_type& xv_sql_df) {
-    nl::json pub_data;
-    std::stringstream html_table("");
-
+    const auto before = clock::now();
     soci::rowset<soci::row> rows = ((*this->sql).prepare << code);
 
-    /* Builds table header */
-    const soci::row& first_row = *rows.begin();
-
-    html_table << "<table>\n<tr>\n";
-    for (std::size_t i = 0; i < first_row.size(); ++i) {
-        std::string name = first_row.get_properties(i).get_name();
-        html_table << "<th>" << name << "</th>\n";
-        xv_sql_df[name] = {"name"};
-        row_headers.push_back(name);
-    }
-    html_table << "</tr>\n";
-
-    /* Builds table body */
+    nl::json pub_data;
+    std::stringstream html_table("");
+    int count = 0;
     for (const soci::row& r : rows) {
+        if (count == 0) {
+            html_table << "<table>\n<tr>\n";
+            for (std::size_t i = 0; i != r.size(); ++i) {
+                std::string name = r.get_properties(i).get_name();
+                html_table << "<th>" << name << "</th>\n";
+                xv_sql_df[name] = {"name"};
+                row_headers.push_back(name);
+            }
+            html_table << "</tr>\n";
+        }
+        count++;
         /* Iterates through cols' rows and builds different kinds of
            outputs
         */
         html_table << "<tr>\n";
         for (std::size_t i = 0; i != r.size(); ++i) {
             std::string cell;
-
             soci::column_properties props = r.get_properties(i);
+            try {
             switch (props.get_data_type()) {
                 case soci::dt_string:
-                    cell = r.get<std::string>(i);
+                    cell = r.get<std::string>(i, "NULL");
                     break;
                 case soci::dt_integer:
                     cell = std::to_string(r.get<int>(i));
@@ -81,14 +84,23 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
                     cell = std::asctime(&when);
                     break;
             }
+            } catch (...) {
+              cell = "NULL";
+            }
             html_table << "<td>" << cell << "</td>\n";
             xv_sql_df[props.get_name()].push_back(cell);
         }
+
         html_table << "</tr>\n";
     }
+    const sec duration = clock::now() - before;
     html_table << "</table>";
+    if (count > 1) {
+        html_table << std::fixed << std::setprecision(2) << count << " rows in set (" << duration.count() << " sec)";
+    } else {
+        html_table << std::fixed << std::setprecision(2) << count << " row in set (" << duration.count() << " sec)";
+    }
 
-    // pub_data["text/plain"] = plain_table.str();
     pub_data["text/html"] = html_table.str();
 
     return pub_data;
@@ -145,6 +157,8 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
             if (this->sql) {
                 /* Shows rich output for tables */
                 if (case_insentive_equals("SELECT", tokenized_code[1]) ||
+                    case_insentive_equals("DESC", tokenized_code[1]) ||
+                    case_insentive_equals("DESCRIBE", tokenized_code[1]) ||
                     case_insentive_equals("SHOW", tokenized_code[1])) {
                     // log(logINFO) << "running sql\n";
                     nl::json data = process_SQL_input(code, row_headers, xv_sql_df);
