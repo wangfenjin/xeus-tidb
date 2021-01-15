@@ -47,6 +47,7 @@ namespace xeus_sql
         void shutdown_request_impl() override;
 
         nl::json process_SQL_input(const std::string& code,
+                                   std::vector<std::string>& row_headers,
                                    xv::df_type& xv_sqlite_df);
 
         std::unique_ptr<soci::session> sql;

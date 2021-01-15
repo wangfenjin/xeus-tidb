@@ -43,7 +43,7 @@ namespace xeus_sql
         {
             return load_db(tokenized_input);
         }
-        throw std::runtime_error("Command is not valid.");
+        throw std::runtime_error("Command is not valid: " + tokenized_input[0]);
     }
 
     static std::pair<std::vector<std::string>, std::vector<std::string>> 

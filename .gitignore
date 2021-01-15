@@ -6,3 +6,6 @@ share/jupyter/kernels/xsql/kernel.json
 
 # Jupyter artefacts
 .ipynb_checkpoints/
+
+.ccls-cache/
+compile_commands.json
