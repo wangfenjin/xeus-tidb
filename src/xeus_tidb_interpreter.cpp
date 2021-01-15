@@ -59,33 +59,33 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
             std::string cell;
             soci::column_properties props = r.get_properties(i);
             try {
-            switch (props.get_data_type()) {
-                case soci::dt_string:
-                    cell = r.get<std::string>(i, "NULL");
-                    break;
-                case soci::dt_integer:
-                    cell = std::to_string(r.get<int>(i));
-                    break;
-                case soci::dt_long_long:
-                    cell = std::to_string(r.get<long long>(i));
-                    break;
-                case soci::dt_unsigned_long_long:
-                    cell = std::to_string(r.get<unsigned long long>(i));
-                    break;
-                case soci::dt_double:
-                    cell = std::to_string(r.get<double>(i));
-                    cell.erase(cell.find_last_not_of('0') + 1, std::string::npos);
-                    if (cell.back() == '.') {
-                        cell.pop_back();
-                    }
-                    break;
-                case soci::dt_date:
-                    std::tm when = r.get<std::tm>(i);
-                    cell = std::asctime(&when);
-                    break;
-            }
+                switch (props.get_data_type()) {
+                    case soci::dt_string:
+                        cell = r.get<std::string>(i, "NULL");
+                        break;
+                    case soci::dt_integer:
+                        cell = std::to_string(r.get<int>(i));
+                        break;
+                    case soci::dt_long_long:
+                        cell = std::to_string(r.get<long long>(i));
+                        break;
+                    case soci::dt_unsigned_long_long:
+                        cell = std::to_string(r.get<unsigned long long>(i));
+                        break;
+                    case soci::dt_double:
+                        cell = std::to_string(r.get<double>(i));
+                        cell.erase(cell.find_last_not_of('0') + 1, std::string::npos);
+                        if (cell.back() == '.') {
+                            cell.pop_back();
+                        }
+                        break;
+                    case soci::dt_date:
+                        std::tm when = r.get<std::tm>(i);
+                        cell = std::asctime(&when);
+                        break;
+                }
             } catch (...) {
-              cell = "NULL";
+                cell = "NULL";
             }
             html_table << "<td>" << cell << "</td>\n";
             xv_sql_df[props.get_name()].push_back(cell);

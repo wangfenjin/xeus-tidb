@@ -87,7 +87,11 @@ static std::unique_ptr<soci::session> load_db(const std::vector<std::string> tok
     for (std::size_t i = 2; i < tokenized_input.size(); i++) {
         aux += tokenized_input[i] + ' ';
     }
-    return std::make_unique<soci::session>(to_lower(tokenized_input[1]), aux);
+    std::string db = to_lower(tokenized_input[1]);
+    if (db == "tidb") {
+        db = "mysql";
+    }
+    return std::make_unique<soci::session>(db, aux);
 }
 
 static std::unique_ptr<soci::session> parse_SQL_magic(const std::vector<std::string>& tokenized_input) {
