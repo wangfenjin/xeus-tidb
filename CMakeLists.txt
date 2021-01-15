@@ -54,7 +54,7 @@ configure_file (
 OPTION(XTIDB_DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
 OPTION(XTIDB_DISABLE_TUNE_GENERIC "disable -mtune=generic flag" OFF)
 
-OPTION(XTIDB_BUILD_STATIC "Build xeus-tidb static library" ON)
+OPTION(XTIDB_BUILD_STATIC "Build xeus-tidb static library" OFF)
 OPTION(XTIDB_BUILD_SHARED "Split xtidb build into executable and library" ON)
 OPTION(XTIDB_BUILD_XTIDB_EXECUTABLE "Build the xtidb executable" ON)
 

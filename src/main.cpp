@@ -1,30 +1,25 @@
 /***************************************************************************
-* Copyright (c) 2020, QuantStack and xeus-tidbite contributors              *
-*                                                                          *
-*                                                                          *
-* Distributed under the terms of the BSD 3-Clause License.                 *
-*                                                                          *
-* The full license is in the file LICENSE, distributed with this software. *
-****************************************************************************/
+ * Copyright (c) 2020, QuantStack and xeus-tidbite contributors              *
+ *                                                                          *
+ *                                                                          *
+ * Distributed under the terms of the BSD 3-Clause License.                 *
+ *                                                                          *
+ * The full license is in the file LICENSE, distributed with this software. *
+ ****************************************************************************/
 
-#include <memory>
 #include <iostream>
+#include <memory>
 
+#include "xeus-tidb/xeus_tidb_interpreter.hpp"
 #include "xeus/xkernel.hpp"
 #include "xeus/xkernel_configuration.hpp"
 
-#include "xeus-tidb/xeus_tidb_interpreter.hpp"
-
-std::string extract_filename(int& argc, char* argv[])
-{
+std::string extract_filename(int& argc, char* argv[]) {
     std::string res = "";
-    for (int i = 0; i < argc; ++i)
-    {
-        if ((std::string(argv[i]) == "-f") && (i + 1 < argc))
-        {
+    for (int i = 0; i < argc; ++i) {
+        if ((std::string(argv[i]) == "-f") && (i + 1 < argc)) {
             res = argv[i + 1];
-            for (int j = i; j < argc - 2; ++j)
-            {
+            for (int j = i; j < argc - 2; ++j) {
                 argv[j] = argv[j + 2];
             }
             argc -= 2;
@@ -34,8 +29,7 @@ std::string extract_filename(int& argc, char* argv[])
     return res;
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     // Load configuration file
     std::string file_name = extract_filename(argc, argv);
 
@@ -49,18 +43,15 @@ int main(int argc, char* argv[])
     using history_manager_ptr = std::unique_ptr<xeus::xhistory_manager>;
     history_manager_ptr hist = xeus::make_in_memory_history_manager();
 
-    if (!file_name.empty())
-    {
+    if (!file_name.empty()) {
         xeus::xconfiguration config = xeus::load_configuration(file_name);
 
-        xeus::xkernel kernel(config,
-                             xeus::get_user_name(),
-                             std::move(interpreter),
-                             std::move(hist),
+        xeus::xkernel kernel(config, xeus::get_user_name(), std::move(interpreter), std::move(hist),
                              xeus::make_console_logger(xeus::xlogger::msg_type,
                                                        xeus::make_file_logger(xeus::xlogger::content, "xeus.log")),
                              xeus::make_xserver_shell_main);
 
+        // clang-format off
         std::clog <<
             "Starting xeus-tidb kernel...\n\n"
             "If you want to connect to this kernel from an other client, you can use"
@@ -94,10 +85,10 @@ int main(int argc, char* argv[])
             "    \"signature_scheme\": \"" + config.m_signature_scheme + "\",\n"
             "    \"key\": \"" + config.m_key + "\"\n"
             "}\n```\n";
+        // clang-format on
 
         kernel.start();
     }
 
     return 0;
 }
-

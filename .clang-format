@@ -1,0 +1,8 @@
+# Use the Google style in this project.
+BasedOnStyle: Google
+
+ColumnLimit: 120
+ContinuationIndentWidth: 4
+IndentWidth: 4
+TabWidth: 4
+UseTab: "Never"

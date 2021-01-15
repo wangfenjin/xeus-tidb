@@ -1,7 +1,7 @@
 {
     "display_name": "xtidb",
     "argv": [
-        "/home/wangfenjin/miniconda3/envs/tidb/bin/xtidb",
+        "/usr/local/Caskroom/miniconda/base/envs/xeus-tidb/bin/xtidb",
         "-f",
         "{connection_file}"
     ],
