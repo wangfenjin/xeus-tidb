@@ -31,8 +31,14 @@ void interpreter::configure_impl() {}
 using clock = std::chrono::system_clock;
 using sec = std::chrono::duration<double>;
 
+void interpreter::publish_ok(int execution_counter) {
+    nl::json pub_data;
+    pub_data["text/plain"] = "Ok.";
+    publish_execution_result(execution_counter, std::move(pub_data), nl::json::object());
+}
+
 nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std::string>& row_headers,
-                                        xv::df_type& xv_sql_df) {
+                                        xv::df_type& xv_sql_df, bool getdf) {
     const auto before = clock::now();
     soci::rowset<soci::row> rows = ((*this->sql).prepare << code);
 
@@ -40,20 +46,18 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
     std::stringstream html_table("");
     int count = 0;
     for (const soci::row& r : rows) {
-        if (count == 0) {
+        if (!getdf && count == 0) {
             html_table << "<table>\n<tr>\n";
             for (std::size_t i = 0; i != r.size(); ++i) {
                 std::string name = r.get_properties(i).get_name();
                 html_table << "<th>" << name << "</th>\n";
-                xv_sql_df[name] = {"name"};
                 row_headers.push_back(name);
             }
             html_table << "</tr>\n";
         }
         count++;
-        /* Iterates through cols' rows and builds different kinds of
-           outputs
-        */
+
+        // Iterates through cols' rows and builds different kinds of outputs
         html_table << "<tr>\n";
         for (std::size_t i = 0; i != r.size(); ++i) {
             std::string cell;
@@ -90,21 +94,30 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
             } catch (...) {
                 cell = "NULL";
             }
-            html_table << "<td>" << cell << "</td>\n";
-            xv_sql_df[props.get_name()].push_back(cell);
+            if (getdf) {
+                xv_sql_df[props.get_name()].push_back(cell);
+            } else {
+                html_table << "<td>" << cell << "</td>\n";
+            }
         }
 
         html_table << "</tr>\n";
     }
     const sec duration = clock::now() - before;
-    html_table << "</table>";
-    if (count > 1) {
-        html_table << std::fixed << std::setprecision(2) << count << " rows in set (" << duration.count() << " sec)";
-    } else {
-        html_table << std::fixed << std::setprecision(2) << count << " row in set (" << duration.count() << " sec)";
-    }
 
-    pub_data["text/html"] = html_table.str();
+    if (!getdf) {
+        html_table << "</table>";
+        if (count == 0) {
+            html_table << std::fixed << std::setprecision(2) << "Empty set (" << duration.count() << " sec)";
+        } else if (count == 1) {
+            html_table << std::fixed << std::setprecision(2) << "1 row in set (" << duration.count() << " sec)";
+        } else {
+            html_table << std::fixed << std::setprecision(2) << count << " rows in set (" << duration.count()
+                       << " sec)";
+        }
+
+        pub_data["text/html"] = html_table.str();
+    }
 
     return pub_data;
 }
@@ -132,21 +145,13 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
                     // we have SQL
                     std::string sql = code;
                     sql.erase(0, code.find("\n") + 1);
-                    nl::json data = process_SQL_input(sql, row_headers, xv_sql_df);
+                    process_SQL_input(sql, row_headers, xv_sql_df, true);
                     if (xv_sql_df.size() == 0) {
                         throw std::runtime_error("empty result from sql, can't render");
                     }
                     xv::data_frame data_frame;
                     data_frame.values = xv_sql_df;
                     j["data"] = data_frame;
-                    // if (row_headers.size() > 0 && j["encoding"].contains("x")) {
-                    //     j["encoding"]["x"]["field"] = row_headers[0];
-                    //     j["encoding"]["x"].erase("title");
-                    // }
-                    // if (row_headers.size() > 1 && j["encoding"].contains("y")) {
-                    //     j["encoding"]["y"]["field"] = row_headers[0];
-                    //     j["encoding"]["y"].erase("title");
-                    // }
                 }
                 auto bundle = nl::json::object();
                 bundle["application/vnd.vegalite.v3+json"] = j;
@@ -155,6 +160,7 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
                 /* Parses LOAD magic */
                 tokenized_code.erase(tokenized_code.begin());
                 this->sql = parse_SQL_magic(tokenized_code);
+                publish_ok(execution_counter);
             }
         } else {
             if (this->sql) {
@@ -172,6 +178,7 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
                 /* Execute all SQL commands that don't output tables */
                 else {
                     *this->sql << code;
+                    publish_ok(execution_counter);
                 }
             } else {
                 throw std::runtime_error("Database was not loaded.");

@@ -37,8 +37,9 @@ class XEUS_TIDB_API interpreter : public xeus::xinterpreter {
     nl::json kernel_info_request_impl() override;
     void shutdown_request_impl() override;
     nl::json handle_exception(std::string what);
+    void publish_ok(int);
     nl::json process_SQL_input(const std::string& code, std::vector<std::string>& row_headers,
-                               xv::df_type& xv_sqlite_df);
+                               xv::df_type& xv_sqlite_df, bool getdf = false);
 
     std::unique_ptr<soci::session> sql;
 };
