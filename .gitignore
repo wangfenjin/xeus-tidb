@@ -7,5 +7,12 @@ share/jupyter/kernels/xsql/kernel.json
 # Jupyter artefacts
 .ipynb_checkpoints/
 
+# ccls
 .ccls-cache/
 compile_commands.json
+
+# osx
+.DS_Store
+
+# vscode
+.vscode/
