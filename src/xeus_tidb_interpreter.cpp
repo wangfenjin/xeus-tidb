@@ -79,6 +79,9 @@ nl::json interpreter::process_SQL_input(const std::string& code, std::vector<std
                             cell.pop_back();
                         }
                         break;
+                    case soci::dt_blob:
+                    case soci::dt_xml:
+                        break;
                     case soci::dt_date:
                         std::tm when = r.get<std::tm>(i);
                         cell = std::asctime(&when);
@@ -174,15 +177,7 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
                 throw std::runtime_error("Database was not loaded.");
             }
         }
-
-        nl::json jresult;
-        jresult["status"] = "ok";
-        jresult["payload"] = nl::json::array();
-        jresult["user_expressions"] = nl::json::object();
-        return jresult;
-    }
-
-    catch (const std::runtime_error& err) {
+    } catch (const std::runtime_error& err) {
         return handle_exception((std::string)err.what());
     } catch (std::exception const& err) {
         return handle_exception((std::string)err.what());
@@ -192,13 +187,18 @@ nl::json interpreter::execute_request_impl(int execution_counter, const std::str
         // https:  // stackoverflow.com/a/54242936/1203241
         try {
             std::exception_ptr curr_excp;
-            if (curr_excp = std::current_exception()) {
+            if ((curr_excp = std::current_exception())) {
                 std::rethrow_exception(curr_excp);
             }
         } catch (const std::exception& err) {
             return handle_exception((std::string)err.what());
         }
     }
+    nl::json jresult;
+    jresult["status"] = "ok";
+    jresult["payload"] = nl::json::array();
+    jresult["user_expressions"] = nl::json::object();
+    return jresult;
 }
 
 nl::json interpreter::handle_exception(std::string what) {
