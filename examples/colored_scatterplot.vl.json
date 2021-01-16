@@ -1,0 +1,17 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "data": {"url": "data/movies.json"},
+  "mark": "circle",
+  "width": 400,
+  "height": 300,
+  "encoding": {
+    "x": {
+      "field": "trackNo", "sort": "ascending", "type": "quantitative"
+    },
+    "y": {
+      "field": "sales", "type": "quantitative"
+    },
+    "color": {"field": "name", "type": "nominal", "sort": {"field": "-x", "order": "descending"}},
+    "size": {"field": "sales", "type": "quantitative"}
+  }
+}
