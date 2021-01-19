@@ -1,3 +1,7 @@
+# This repo is archived as I had contribute the logic back to [xeus-sql](https://github.com/jupyter-xeus/xeus-sql/issues/17)
+
+----
+
 # xeus-tidb
 
 A Jupyter kernel for TiDB
